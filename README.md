@@ -2,27 +2,38 @@
 
 A multiplayer mod that matches players into pairs, where each player in a pair shares damage of the other. Based on the "shared damage" mod.
 
-## WARNING WARNING WARNING
-
-THIS MOD IS UNDER DEVELOPMENT. It doesn't crash at start, but I don't know yet what it does. Have fun.
-
 ## Features
 
-* Sharing damage! (if it's not buggy)
-* Sharing hunder and weight! (if it's not buggy)
-* Sharing healing! (if it's not buggy)
-* New soulmates chosen at every biome! (if it's not buggy)
+Implemented:
+
+* Sharing damage!
+* Sharing hunger and weight!
+* Sharing healing!
+* New soulmates chosen at every biome!
+* Sharing bonks! (configurable)
+* Sharing extra stamina gain! (configurable)
+* Sharing extra stamina USE! (configurable)
+* Shared lollipops and energy drinks! (configurable)
+
+Implemented, but maybe buggy:
+
+* None.
 
 ## Planned features
 
 * Logo that's not a half-assed "shared damage" ripoff.
 * Better way to indicate who's your soulmate.
+* Shared slipping.
 * Fix bugs.
-* Configuration options: what damage is shared, damage multipliers, etc.
 
 ## Installation
 
 1. Extract the mod folder into `BepInEx/plugins`
+
+## Configuration
+
+1. Run the mod once.
+2. Open and edit the file `BepInEx/config/com.github.Wesmania.Soulmates.cfg` in PEAK's directory.
 
 ## Multiplayer Compatibility
 

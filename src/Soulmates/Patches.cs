@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using HarmonyLib;
+using Photon.Voice.PUN.UtilityScripts;
+using UnityEngine;
 
 namespace Soulmates;
 

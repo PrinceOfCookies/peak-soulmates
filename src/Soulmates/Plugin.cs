@@ -31,16 +31,45 @@ public static class Extensions
 public partial class Plugin : BaseUnityPlugin
 {
     internal static ManualLogSource Log { get; private set; } = null!;
-    internal static ConfigEntry<bool> EnablePoison { get; private set; } = null!;
+    internal static ConfigEntry<bool> Enabled { get; private set; } = null!;
+    internal static ConfigEntry<bool> EnableSharedBonk { get; private set; } = null!;
+    internal static ConfigEntry<bool> EnableSharedSlip { get; private set; } = null!;
+    internal static ConfigEntry<bool> EnableSharedExtraStaminaGain { get; private set; } = null!;
+    internal static ConfigEntry<bool> EnableSharedExtraStaminaUse { get; private set; } = null!;
+    internal static ConfigEntry<bool> EnableSharedLolli { get; private set; } = null!;
+    internal static ConfigEntry<bool> EnableSharedEnergol { get; private set; } = null!;
 
     internal const byte SHARED_DAMAGE_EVENT_CODE = 198;
+
     private void Awake()
     {
         Log = Logger;
-        Log.LogInfo($"Plugin {Name} version 0.1.10 is loaded!");
+        Log.LogInfo($"Plugin {Name} version 0.1.16 is loaded!");
 
-        EnablePoison = Config.Bind("Shared Status Effects", "EnablePoison", true, "Share Poison damage");
-
+        Enabled = Config.Bind("Enabled", "Enabled", true, "Enable/disable the mod with this");
+        EnableSharedBonk = Config.Bind("Shared Bonk", "EnableSharedBonk", true, "Bonking a player bonks his soulmate too");
+        EnableSharedSlip = Config.Bind("Shared Slip", "EnableSharedSlip", true, "Slipping on something makes the soulmate slip too");
+        EnableSharedExtraStaminaGain = Config.Bind("Shared extra stamina gain",
+                                                   "EnableSharedExtraStaminaGain",
+                                                   true,
+                                                   "Soulmates share extra stamina gained");
+        EnableSharedExtraStaminaUse = Config.Bind("Shared extra stamina use",
+                                                  "EnableSharedExtraStaminaUse",
+                                                  true,
+                                                  "Soulmates use a single extra stamina pool");
+        EnableSharedLolli = Config.Bind("Shared lollipops",
+                                        "EnableSharedLolli",
+                                        true,
+                                        "Soulmates share lollipop boost");
+        EnableSharedEnergol = Config.Bind("Shared energy drinks",
+                                        "EnableSharedEnergol",
+                                        true,
+                                        "Soulmates share energy drink boost");
+        if (!Enabled.Value)
+        {
+            Log.LogInfo("Soulmates disabled");
+            return;
+        }
         PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
 
         Harmony harmony = new("com.github.Wesmania.Soulmates");
@@ -57,6 +86,8 @@ public partial class Plugin : BaseUnityPlugin
 
     private void OnDestroy()
     {
+        if (!Enabled.Value) return;
+
         if (PhotonNetwork.NetworkingClient != null)
         {
             PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
@@ -74,7 +105,7 @@ public partial class Plugin : BaseUnityPlugin
     }
 
     public static int globalSoulmate = -1;
-    private static RecalculateSoulmatesEvent? previousSoulmates;
+    public static RecalculateSoulmatesEvent? previousSoulmates;
 
     private void OnEvent(EventData photonEvent)
     {
@@ -98,6 +129,15 @@ public partial class Plugin : BaseUnityPlugin
                 break;
             case (int)SoulmateEventType.CONNECT_TO_SOULMATE:
                 ConnectSoulmate.OnConnectToSoulmate(photonEvent);
+                break;
+            case (int)SoulmateEventType.SHARED_BONK:
+                Bonk.OnSharedBonkEvent(photonEvent);
+                break;
+            case (int)SoulmateEventType.SHARED_EXTRA_STAMINA:
+                StamUtil.OnSharedExtraStaminaEvent(photonEvent);
+                break;
+            case (int)SoulmateEventType.SHARED_AFFLICTION:
+                AfflictionUtil.onSharedAfflictionEvent(photonEvent);
                 break;
             default:
                 return;
@@ -216,6 +256,7 @@ public partial class Plugin : BaseUnityPlugin
 
         localChar.refs.afflictions.UpdateWeight();
     }
+
     private static void OnRecalculateSoulmateEvent(EventData photonEvent)
     {
         Log.LogInfo("Received recalculate soulmate event");
@@ -293,6 +334,16 @@ public partial class Plugin : BaseUnityPlugin
         if (firstTime)
         {
             previousSoulmates = null;
+        }
+        if (previousSoulmates.HasValue) {
+            soulmates.config = previousSoulmates.Value.config;
+        } else {
+            soulmates.config.sharedBonk = EnableSharedBonk.Value;
+            soulmates.config.sharedSlip = EnableSharedSlip.Value;
+            soulmates.config.sharedExtraStaminaGain = EnableSharedExtraStaminaGain.Value;
+            soulmates.config.sharedExtraStaminaUse = EnableSharedExtraStaminaUse.Value;
+            soulmates.config.sharedLolli = EnableSharedLolli.Value;
+            soulmates.config.sharedEnergol = EnableSharedEnergol.Value;
         }
 
         // Fill in base values first.
